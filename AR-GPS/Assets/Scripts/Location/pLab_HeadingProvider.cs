@@ -38,6 +38,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using BlocInBloc;
 
 /// <summary>
 /// Heading updated event arguments.
@@ -52,10 +53,10 @@ public class pLab_HeadingUpdatedEventArgs : EventArgs
 }
 
 
-public class pLab_HeadingProvider : MonoBehaviour
-{
-    #region Variables
-
+public class pLab_HeadingProvider : MonoBehaviour {
+    public NativeLocation nativeLocation;
+    
+#region Variables
     double lastHeadingTimestamp;
 
     [SerializeField]
@@ -68,7 +69,7 @@ public class pLab_HeadingProvider : MonoBehaviour
     private float heading = 0;
     private float filteredHeading = -1f;
 
-    #region Debug Variables
+#region Debug Variables
 
     [Header("Debugging")]
     [SerializeField]
@@ -92,7 +93,7 @@ public class pLab_HeadingProvider : MonoBehaviour
 
     #region Properties
 
-    public bool UseFakeData { get { return useFakeData; } set { Input.compass.enabled = !value; useFakeData = value; } }
+    public bool UseFakeData { get { return useFakeData; } set { /*Input.compass.enabled = !value;*/ useFakeData = value; } }
     
     public float Heading { get { return heading; } }
     public double LastHeadingTimestamp { get { return lastHeadingTimestamp; } }
@@ -106,7 +107,7 @@ public class pLab_HeadingProvider : MonoBehaviour
 
     private void Start() {
         if (!useFakeData) {
-            Input.compass.enabled = true;
+            // Input.compass.enabled = true;
         }
     }
 
@@ -145,11 +146,11 @@ public class pLab_HeadingProvider : MonoBehaviour
     }
 
     private void PollHeading() {
-        double timestamp = Input.compass.timestamp;
-
-        if (Input.compass.enabled && timestamp > lastHeadingTimestamp)
+        double timestamp = nativeLocation.headingTimestamp;
+        
+        if (nativeLocation.headingAvailable && timestamp > lastHeadingTimestamp)
         {
-            heading = Input.compass.trueHeading;
+            heading = nativeLocation.trueHeading;
             lastHeadingTimestamp = timestamp;
 
             CalculateFilteredHeading(heading);

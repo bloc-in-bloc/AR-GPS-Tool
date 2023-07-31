@@ -12,6 +12,10 @@ EditorBuildSettings:
     path: Assets/Debug/Scenes/Demo with Debug Scene.unity
     guid: da7bcd0ee41d531438a2eea7bb79fc42
   m_configObjects:
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 5df93369ab68e4ff9a25f90f882a5c48,
+      type: 2}
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 11a3e4015712c4f968c43fdeda6f3e4f,
+      type: 2}
     com.unity.xr.arcore.PlayerSettings: {fileID: 11400000, guid: 73b0bbe42a86abe48af8928457a1d47f,
       type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 3af89e56f107d634fbd4839ae77155d8,

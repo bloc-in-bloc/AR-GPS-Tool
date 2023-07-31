@@ -37,6 +37,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BlocInBloc;
 using UnityEngine;
 #if PLATFORM_ANDROID
 using UnityEngine.Android;
@@ -57,6 +58,8 @@ public class pLab_LocationUpdatedEventArgs : EventArgs
 public class pLab_LocationProvider : MonoBehaviour
 {
     #region Variables
+    public NativeLocation nativeLocation;
+    
     /// <summary>
     /// Using higher value like 500 usually does not require to turn GPS chip on and thus saves battery power. 
     /// Values like 5-10 could be used for getting best accuracy.
@@ -158,26 +161,15 @@ public class pLab_LocationProvider : MonoBehaviour
     /// <returns>The location routine.</returns>
     private IEnumerator PollLocationRoutine()
     {
-        #if PLATFORM_ANDROID
-            
-            if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
-            {
-                Permission.RequestUserPermission(Permission.FineLocation);
-            }
-
-        #endif
-
-        if (!Input.location.isEnabledByUser)
-        {
-            Debug.Log("Location not enabled by user");
-            yield break;
+        bool locationIsInitialized = nativeLocation.isInitialized;
+        if (!locationIsInitialized) {
+            locationIsInitialized = nativeLocation.Init ();
         }
-
-        Input.location.Start(desiredAccuracyInMeters, updateDistanceInMeters);
-        Input.compass.enabled = true;
-
+        
+        nativeLocation.StartLocation (true, true, true);
+        
         int maxWait = 20;
-        while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
+        while (nativeLocation.locationStatus == NativeLocation.LocationStatus.Initializing && maxWait > 0)
         {
             yield return wait;
             maxWait--;
@@ -185,32 +177,42 @@ public class pLab_LocationProvider : MonoBehaviour
 
         if (maxWait < 1)
         {
+            Debug.LogError ("MaxWait < 1 !");
             yield break;
         }
 
-        if (Input.location.status == LocationServiceStatus.Failed)
+        if (nativeLocation.locationStatus == NativeLocation.LocationStatus.Failed)
         {
+            Debug.LogError ("Failed !");
             yield break;
         }
 
-        while (true)
-        {
-            double timestamp = Input.location.lastData.timestamp;
+        while (true) {
+            double timestamp = nativeLocation.locationTimestamp;
 
-            if (Input.location.status == LocationServiceStatus.Running && timestamp > lastLocationTimestamp)
+            if (nativeLocation.locationStatus == NativeLocation.LocationStatus.Running && timestamp > lastLocationTimestamp)
             {
                 lastLocationTimestamp = timestamp;
 
-                LocationInfo locationInfo = Input.location.lastData;
-                latestLocationInfo = locationInfo;
+                location = new pLab_LatLon(nativeLocation.locationLatitude, nativeLocation.locationLongitude);
+                
+                latestLocationInfo = new LocationInfo();
+                pLab_LocationUpdatedEventArgs locationEventArgs = new pLab_LocationUpdatedEventArgs()
+                {
+                    location = location,
+                    altitude = Convert.ToSingle (nativeLocation.locationAltitude),
+                    horizontalAccuracy = nativeLocation.locationHorizontalAccuracy,
+                    verticalAccuracy = nativeLocation.locationVerticalAccuracy,
+                    timestamp = timestamp
+                };
 
-                location = new pLab_LatLon(locationInfo.latitude, locationInfo.longitude);
-
-                if (locationInfo.horizontalAccuracy < 5f) {
-                    latestAccurateLocation = location;
+                if (OnLocationUpdated != null) {
+                    OnLocationUpdated(this, locationEventArgs);
                 }
 
-                SendUpdatedLocation();
+                if (nativeLocation.locationHorizontalAccuracy < 5f) {
+                    latestAccurateLocation = location;
+                }
             }
 
             yield return null;
@@ -228,6 +230,7 @@ public class pLab_LocationProvider : MonoBehaviour
 
             location = fakeCoordinates;
             latestLocationInfo = new LocationInfo();
+            
             pLab_LocationUpdatedEventArgs locationEventArgs = new pLab_LocationUpdatedEventArgs()
             {
                 location = location,
