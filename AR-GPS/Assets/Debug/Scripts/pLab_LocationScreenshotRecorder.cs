@@ -155,10 +155,10 @@ public class pLab_LocationScreenshotRecorder : MonoBehaviour
         RecordData recordData = new RecordData()
         {
             screenshotPath = screenshotPath,
-            latitude = locInfo.latitude,
-            longitude = locInfo.longitude,
-            horizontalAccuracy = locInfo.horizontalAccuracy,
-            verticalAccuracy = locInfo.verticalAccuracy,
+            latitude = locationProvider.Location.Lat,
+            longitude = locationProvider.Location.Lon,
+            horizontalAccuracy = 0.02f,
+            verticalAccuracy = 0.02f,
             compassHeading = headingProvider.FilteredHeading,
             gpsHeading = arTrueNorthFinder.GPSHeading,
             arHeading = arTrueNorthFinder.ARHeading,
