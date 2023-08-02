@@ -399,6 +399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1efb58ed1d4f5443bffbddb1e07c34b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nativeBluetooth: {fileID: 322978401}
   nativeLocation: {fileID: 291533158}
   desiredAccuracyInMeters: 0.5
   updateDistanceInMeters: 2
@@ -436,6 +437,131 @@ MonoBehaviour:
   onLocationAuthorizationStatusChange:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &322978400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 322978402}
+  - component: {fileID: 322978401}
+  m_Layer: 0
+  m_Name: NativeBluetooth
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &322978401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 322978400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fdc647b964ba4a7480be300747ab758, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mockedFrames:
+  - $GPLLQ,113615.50,041006,1351169.857,M,6240352.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113616.00,041006,1351169.857,M,6240353.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113616.50,041006,1351169.857,M,6240354.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113617.00,041006,1351169.857,M,6240355.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113617.50,041006,1351169.857,M,6240356.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113618.00,041006,1351169.857,M,6240357.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113618.60,041006,1351169.857,M,6240358.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240359.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240360.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240361.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240362.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240363.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240364.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240365.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240366.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240367.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240368.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240369.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240370.754,M,3,12,0.010,55.597,M*12
+  - $GPLLQ,113619.00,041006,1351169.857,M,6240371.754,M,3,12,0.010,55.597,M*12
+  OnNewTrame:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNewBluetoothState:
+    m_PersistentCalls:
+      m_Calls: []
+  bluetoothDeviceDisconnected:
+    m_PersistentCalls:
+      m_Calls: []
+  currentState: 0
+--- !u!4 &322978402
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 322978400}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &432107769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 432107771}
+  - component: {fileID: 432107770}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &432107770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432107769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 386092520861946e5a21a055855de55b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  previousGPSCoordinates:
+    lat: 47.27079499
+    lon: 1.61294419
+  newGpsCoordinates:
+    lat: 47.27104823
+    lon: 1.61237365
+--- !u!4 &432107771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432107769}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 672.547, y: 258.44843, z: -692.44385}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 14
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &449732834 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 180364475474074966, guid: 8679146830d76e14dabe337b6bf6e854,
@@ -2562,6 +2688,11 @@ PrefabInstance:
       propertyPath: locationProvider
       value: 
       objectReference: {fileID: 291533156}
+    - target: {fileID: 5032574721388400640, guid: 073cb6a9da19ca446b51961982e17c66,
+        type: 3}
+      propertyPath: arTrueNorthFinder
+      value: 
+      objectReference: {fileID: 695617811}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 073cb6a9da19ca446b51961982e17c66, type: 3}
 --- !u!1001 &654894761973952633
@@ -2788,7 +2919,7 @@ PrefabInstance:
     - target: {fileID: 1721057501189390939, guid: 11eb5fcd0b2270c4f8c2d27aeb58d546,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -4.999878
+      value: -4.9998016
       objectReference: {fileID: 0}
     - target: {fileID: 1721057501189390939, guid: 11eb5fcd0b2270c4f8c2d27aeb58d546,
         type: 3}
@@ -3444,7 +3575,7 @@ PrefabInstance:
     - target: {fileID: 5848688775447204144, guid: 851cbbffd3711da46a6555cd6aac65af,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -4.999878
+      value: -4.9998016
       objectReference: {fileID: 0}
     - target: {fileID: 5848688775447204144, guid: 851cbbffd3711da46a6555cd6aac65af,
         type: 3}

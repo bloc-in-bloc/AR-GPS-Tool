@@ -37,7 +37,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using BlocInBloc;
+using BlocInBloc.NativeBluetooth;
+using BlocInBloc.Trame;
 using UnityEngine;
 #if PLATFORM_ANDROID
 using UnityEngine.Android;
@@ -58,8 +63,9 @@ public class pLab_LocationUpdatedEventArgs : EventArgs
 public class pLab_LocationProvider : MonoBehaviour
 {
     #region Variables
+    public NativeBluetooth nativeBluetooth;
     public NativeLocation nativeLocation;
-    
+
     /// <summary>
     /// Using higher value like 500 usually does not require to turn GPS chip on and thus saves battery power. 
     /// Values like 5-10 could be used for getting best accuracy.
@@ -88,9 +94,12 @@ public class pLab_LocationProvider : MonoBehaviour
     private pLab_LatLon latestAccurateLocation;
 
     private LocationInfo latestLocationInfo;
+    private bool _isConnected = false;
+    private int _positionQuality;
+    private double _latitudeError;
+    private double _longitudeError;
 
-
-    #region Debug Variables
+#region Debug Variables
     [Header("Debug")]
     [SerializeField]
     private bool useFakeData = false;
@@ -109,9 +118,12 @@ public class pLab_LocationProvider : MonoBehaviour
     public double LastLocationTimestamp { get { return lastLocationTimestamp; } }
 
     public LocationInfo LatestLocationInfo { get { return latestLocationInfo; } }
-    
+    public int PositionQuality { get { return _positionQuality; } }
+    public double LatitudeError { get { return _latitudeError; } }
+    public double LongitudeError { get { return _longitudeError; } }
 
-    #region Debug Properties
+
+#region Debug Properties
 
     public bool UseFakeData {
         get { return useFakeData; }
@@ -146,7 +158,8 @@ public class pLab_LocationProvider : MonoBehaviour
         wait = new WaitForSeconds(1f);
 
         StartPollLocationRoutine();
-
+        
+        nativeBluetooth.OnNewTrame.AddListener (OnFrameReceived);
     }
 
     #endregion
@@ -166,57 +179,34 @@ public class pLab_LocationProvider : MonoBehaviour
             locationIsInitialized = nativeLocation.Init ();
         }
         
-        nativeLocation.StartLocation (true, true, true);
+        if (_isConnected) {
+            yield break;
+        }
+        NativeBluetooth.InitializeBluetooth ();
+
+        Debug.LogError (NativeBluetooth.GetConnectedBluetoothAccessories ().Length);
         
-        int maxWait = 20;
-        while (nativeLocation.locationStatus == NativeLocation.LocationStatus.Initializing && maxWait > 0)
-        {
-            yield return wait;
-            maxWait--;
-        }
+        NativeBluetooth.BluetoothAccessory[] tmp = NativeBluetooth.GetConnectedBluetoothAccessories ()
+                                                                  .Where (ba => ba.name.Contains ("FLX100")).ToArray ();
 
-        if (maxWait < 1)
-        {
-            Debug.LogError ("MaxWait < 1 !");
+        if (tmp.Length == 0) {
+            Debug.LogError ("Can't find any FLX100 to connect !");
             yield break;
         }
 
-        if (nativeLocation.locationStatus == NativeLocation.LocationStatus.Failed)
-        {
-            Debug.LogError ("Failed !");
+        NativeBluetooth.BluetoothAccessory connectedBluetoothAccessory = tmp[0];
+        
+        if (!NativeBluetooth.SetupController (connectedBluetoothAccessory.connectionId)) {
+            Debug.LogError ($"GNNS: Failed to setup controller with {connectedBluetoothAccessory.connectionId}");
             yield break;
         }
 
-        while (true) {
-            double timestamp = nativeLocation.locationTimestamp;
-
-            if (nativeLocation.locationStatus == NativeLocation.LocationStatus.Running && timestamp > lastLocationTimestamp)
-            {
-                lastLocationTimestamp = timestamp;
-
-                location = new pLab_LatLon(nativeLocation.locationLatitude, nativeLocation.locationLongitude);
-                
-                latestLocationInfo = new LocationInfo();
-                pLab_LocationUpdatedEventArgs locationEventArgs = new pLab_LocationUpdatedEventArgs()
-                {
-                    location = location,
-                    altitude = Convert.ToSingle (nativeLocation.locationAltitude),
-                    horizontalAccuracy = nativeLocation.locationHorizontalAccuracy,
-                    verticalAccuracy = nativeLocation.locationVerticalAccuracy,
-                    timestamp = timestamp
-                };
-
-                if (OnLocationUpdated != null) {
-                    OnLocationUpdated(this, locationEventArgs);
-                }
-
-                if (nativeLocation.locationHorizontalAccuracy < 5f) {
-                    latestAccurateLocation = location;
-                }
-            }
-
-            yield return null;
+        if (!NativeBluetooth.OpenSession ()) {
+            Debug.LogError ($"GNNS: Failed to open session with {connectedBluetoothAccessory.connectionId}");
+            yield break;
         }
+
+        _isConnected = true;
     }
 
     private IEnumerator PollLocationRoutineFake() {
@@ -253,6 +243,70 @@ public class pLab_LocationProvider : MonoBehaviour
 
     #region Private Methods
 
+    public void OnFrameReceived (string trame) {
+        Match match = Regex.Match (trame, @"^.[^\*]*");
+        if (!match.Success) {
+            Debug.LogError ("NMEA Trame does not match regex");
+            return;
+        }
+        trame = match.Groups.First ().Value;
+        string[] tokens = trame.Split (',');
+        if (!tokens.Any ()) {
+            return;
+        }
+        if (tokens[0].Contains ("GGA")) {
+            try {
+                GGATrame tmpLLQTrame = new GGATrame (tokens);
+
+                if (tmpLLQTrame.altitude == 0 && tmpLLQTrame.latitude == 0) {
+                    return;
+                }
+
+                double timestamp = Convert.ToDouble(tmpLLQTrame.utcTime);
+
+                if (timestamp > lastLocationTimestamp) {
+                    lastLocationTimestamp = timestamp;
+
+                    location = new pLab_LatLon(tmpLLQTrame.latitude, tmpLLQTrame.longitude);
+                
+                    latestLocationInfo = new LocationInfo();
+                    pLab_LocationUpdatedEventArgs locationEventArgs = new pLab_LocationUpdatedEventArgs()
+                    {
+                        location = location,
+                        altitude = Convert.ToSingle (tmpLLQTrame.altitude),
+                        horizontalAccuracy = 0.02f,
+                        verticalAccuracy = 0.02f,
+                        timestamp = timestamp
+                    };
+
+                    if (OnLocationUpdated != null) {
+                        OnLocationUpdated(this, locationEventArgs);
+                    }
+
+                    latestAccurateLocation = location;
+                }
+            } catch (InvalidDataException e) {
+                Debug.LogError (e);
+            }
+        } else if (tokens[0].Contains ("GGA")) {
+            try {
+                GGATrame ggaTrame = new GGATrame (tokens);
+                _positionQuality = ggaTrame.positionQuality;
+            } catch (InvalidDataException e) {
+                Debug.LogError (e);
+            }
+        } else if (tokens[0].Contains ("GST")) {
+            Debug.Log (trame);
+            try {
+                GSTTrame gstTrame = new GSTTrame (tokens);
+                _latitudeError = gstTrame.latitudeError;
+                _longitudeError = gstTrame.longitudeError;
+            } catch (InvalidDataException e) {
+                Debug.LogError (e);
+            }
+        }
+    }
+
     private void StartPollLocationRoutine() {
         if (pollRoutine != null) {
             StopCoroutine(pollRoutine);
@@ -277,8 +331,7 @@ public class pLab_LocationProvider : MonoBehaviour
                 verticalAccuracy = latestLocationInfo.verticalAccuracy,
                 timestamp = latestLocationInfo.timestamp
             };
-
-
+            
             OnLocationUpdated(this, eventArgs);
         }
     }

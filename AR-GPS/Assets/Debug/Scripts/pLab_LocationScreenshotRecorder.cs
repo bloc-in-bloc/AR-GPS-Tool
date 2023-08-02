@@ -59,6 +59,16 @@ public class pLab_LocationScreenshotRecorder : MonoBehaviour
         public float horizontalAccuracy;
         public float verticalAccuracy;
         public float compassHeading;
+        public float gpsHeading;
+        public float arHeading;
+        public float gpsArDifference;
+        public float medianGPSARHeadingDifference;
+        public float averageGPSARHeadingDifference;
+        public float initialGPSARDifference;
+        public int ggaPositionQuality;
+        public double gstLatitudeError;
+        public double gstLongitudeError;
+        public float[] lastGPSARHeadingDeltas;
         public int index;
         public string screenshotPath;
     }
@@ -78,6 +88,9 @@ public class pLab_LocationScreenshotRecorder : MonoBehaviour
 
     [SerializeField]
     private pLab_HeadingProvider headingProvider;
+
+    [SerializeField]
+    private pLab_ARTrueNorthFinder arTrueNorthFinder;
 
     [Header("Save settings")]
     [SerializeField]
@@ -147,6 +160,15 @@ public class pLab_LocationScreenshotRecorder : MonoBehaviour
             horizontalAccuracy = locInfo.horizontalAccuracy,
             verticalAccuracy = locInfo.verticalAccuracy,
             compassHeading = headingProvider.FilteredHeading,
+            gpsHeading = arTrueNorthFinder.GPSHeading,
+            arHeading = arTrueNorthFinder.ARHeading,
+            gpsArDifference = arTrueNorthFinder.ARGPSDifference,
+            medianGPSARHeadingDifference = arTrueNorthFinder.MedianGPSARHeadingDifference,
+            averageGPSARHeadingDifference = arTrueNorthFinder.AverageGPSARHeadingDifference,
+            initialGPSARDifference = arTrueNorthFinder.InitialGPSARDifference,
+            lastGPSARHeadingDeltas = arTrueNorthFinder.LastGPSARHeadingDeltas.ToArray (),
+            gstLatitudeError = locationProvider.LatitudeError,
+            gstLongitudeError = locationProvider.LongitudeError,
             timestamp = timestamp,
             index = index
         };

@@ -1,0 +1,15 @@
+// Used to call objective C code from swift
+// https://github.com/jwtan/SwiftToUnityExample
+
+framework module UnityFramework {
+  umbrella header "UnityFramework.h"
+
+  export *
+  module * { export * }
+
+  module UnityInterface {
+      header "NativeBluetooth.h"
+
+      export *
+  }
+}

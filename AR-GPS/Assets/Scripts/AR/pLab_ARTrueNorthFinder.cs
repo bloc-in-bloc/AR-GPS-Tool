@@ -205,6 +205,7 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
 
     private float arHeading;
     private float gpsHeading;
+    private float arGpsDiff;
     private float medianGPSARHeadingDifference;
     private float averageGPSARHeadingDifference;
     private float distance;
@@ -272,6 +273,11 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
     public float Heading { get { return heading; } }
     public float ARHeading { get { return arHeading; } }
     public float GPSHeading { get { return gpsHeading; } }
+    public float ARGPSDifference { get { return arGpsDiff; } }
+    public float MedianGPSARHeadingDifference { get { return medianGPSARHeadingDifference; } }
+    public float AverageGPSARHeadingDifference { get { return averageGPSARHeadingDifference; } }
+    public float InitialGPSARDifference { get { return initialGPSARDifference; } }
+    public List<float> LastGPSARHeadingDeltas { get { return lastGPSARHeadingDeltas; } }
 
     public CalculationPhase CalculationPhaseProp { 
         get { return calculationPhase; }
@@ -497,17 +503,17 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
             previousARCameraPosition = newPosition;
             previousGPSAccuracy = e.horizontalAccuracy;
 
-            float diff = CalculateGPSARHeadingDifference(arHeading, gpsHeading);
+            arGpsDiff = CalculateGPSARHeadingDifference(arHeading, gpsHeading);
 
             if (lastGPSARHeadingDeltas.Count == 0) {
-                initialGPSARDifference = diff;
+                initialGPSARDifference = arGpsDiff;
                 lastGPSARHeadingDeltas.Add(0);
             } else {
                 if (lastGPSARHeadingDeltas.Count >= maxLastMovementHeadings) {
                     lastGPSARHeadingDeltas.RemoveAt(0);
                 }
 
-                float readingDelta = diff - initialGPSARDifference;
+                float readingDelta = arGpsDiff - initialGPSARDifference;
 
                 if (readingDelta > 180) {
                     readingDelta -= 360;
@@ -532,7 +538,7 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
                 pLab_HeadingFromMovementUpdatedEventArgs eventArgs = new pLab_HeadingFromMovementUpdatedEventArgs() {
                     arHeading = arHeading,
                     gpsHeading = gpsHeading,
-                    headingDifference = diff,
+                    headingDifference = arGpsDiff,
                     medianHeadingDifference = medianGPSARHeadingDifference,
                     averageHeadingDifference = averageGPSARHeadingDifference
                 };
@@ -646,9 +652,10 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
                 if (hasGPSARHeading) {
                     recalculatedHeading = averageGPSARHeadingDifference;
                 }
+                /*
                 else if (hasCompassHeading){
                     recalculatedHeading = compassModeHeading;
-                }
+                }*/
 
                 break;
             case CalculationMode.Both:
@@ -657,6 +664,7 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
                     //Average of two angles with Lerp
                     recalculatedHeading = pLab_MathConversions.DegAngle0To360(Mathf.LerpAngle(averageGPSARHeadingDifference, compassModeHeading, 0.5f));
                 }
+                /*
                 //If we only have the compass heading calculated
                 else if (hasCompassHeading) {
                     recalculatedHeading = compassModeHeading;
@@ -664,7 +672,7 @@ public class pLab_ARTrueNorthFinder : MonoBehaviour
                 //If we only have the GPS-AR -heading calculated
                 else if (hasGPSARHeading) {
                     recalculatedHeading = averageGPSARHeadingDifference;
-                }
+                }*/
 
                 break;
             case CalculationMode.Manual:
